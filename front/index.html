@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tech Tycoon – Juego de gestión y tower defense en tu navegador." />
+  <title>Tech Tycoon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #050a14;
+      --surface: #0d1a2e;
+      --accent:  #00d4ff;
+      --accent2: #7c3aed;
+      --gold:    #f59e0b;
+      --danger:  #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Grid animado */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to   { background-position: 48px 48px; }
+    }
+
+    /* Orbs de fondo */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.16;
+      pointer-events: none;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent2); top: -150px; left: -150px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--accent);  bottom: -120px; right: -120px; }
+
+    /* Card principal */
+    .hero {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 3rem 4rem;
+      background: rgba(13, 26, 46, 0.72);
+      border: 1px solid rgba(0,212,255,.18);
+      border-radius: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 0 60px rgba(0,212,255,.07), 0 24px 80px rgba(0,0,0,.6);
+      width: min(480px, 92vw);
+      animation: fadeUp .7s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .7rem;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .12em;
+      color: var(--accent);
+      background: rgba(0,212,255,.07);
+      border: 1px solid rgba(0,212,255,.28);
+      padding: .28rem .8rem;
+      border-radius: 99px;
+      margin-bottom: 1.4rem;
+    }
+    .badge::before { content: '◆'; font-size: .55rem; }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 7vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 65%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .6rem;
+    }
+
+    .subtitle {
+      font-size: .9rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2.4rem;
+    }
+
+    /* Botones del menú */
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      font-family: 'Orbitron', monospace;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      padding: .9rem 1.5rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+      width: 100%;
+    }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0px); }
+
+    /* Iniciar Juego – gradiente primario */
+    .btn-start {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
+      box-shadow: 0 0 22px rgba(0,212,255,.2);
+      border-color: transparent;
+    }
+    .btn-start:hover { box-shadow: 0 0 36px rgba(0,212,255,.4); }
+
+    /* Ajuste – borde con relleno sutil */
+    .btn-settings {
+      color: var(--gold);
+      background: rgba(245,158,11,.06);
+      border-color: rgba(245,158,11,.35);
+    }
+    .btn-settings:hover {
+      background: rgba(245,158,11,.12);
+      border-color: rgba(245,158,11,.65);
+      box-shadow: 0 0 22px rgba(245,158,11,.18);
+    }
+
+    /* Salir – rojo sutil */
+    .btn-quit {
+      color: var(--danger);
+      background: rgba(239,68,68,.05);
+      border-color: rgba(239,68,68,.3);
+    }
+    .btn-quit:hover {
+      background: rgba(239,68,68,.12);
+      border-color: rgba(239,68,68,.6);
+      box-shadow: 0 0 22px rgba(239,68,68,.18);
+    }
+
+    /* Divisor decorativo */
+    .divider {
+      width: 40%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,.3), transparent);
+      margin: 1.6rem auto;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: fixed;
+      bottom: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .68rem;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 7px #22c55e;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .38; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <main class="hero">
+    <div class="badge">v0.1.0 ALPHA</div>
+    <h1>Tech Tycoon</h1>
+    <p class="subtitle">
+      Construye tu imperio tecnológico,<br>gestiona recursos y defiende tu territorio.
+    </p>
+
+    <div class="divider"></div>
+
+    <nav class="menu-buttons" aria-label="Menú principal">
+      <a id="btn-start"    href="/game"     class="btn btn-start">    🚀 Iniciar Juego </a>
+      <a id="btn-settings" href="/settings" class="btn btn-settings"> ⚙️ Ajuste        </a>
+      <button id="btn-quit" class="btn btn-quit" onclick="window.close()">✖ Salir</button>
+    </nav>
+  </main>
+
+  <div class="status-bar">
+    <div class="dot"></div>
+    SERVIDOR ACTIVO · API /api/status
+  </div>
+
+  <script>
+    fetch('/api/status')
+      .then(r => r.json())
+      .then(d => console.log('[Tech Tycoon] API ok:', d))
+      .catch(e => console.warn('[Tech Tycoon] API no disponible:', e));
+  </script>
+</body>
+</html>

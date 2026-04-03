@@ -1,0 +1,45 @@
+[
+  {
+    "id": "upg_cableado",
+    "name": "Cableado de Iridio",
+    "type": "upgrade",
+    "description": "Optimiza la conductividad eléctrica de los generadores. (+Generación Créditos)",
+    "cost": 5,
+    "cost_type": "w_hex",
+    "max_level": 10,
+    "base_multiplier": 1.05,
+    "level_step": 0.44
+  },
+  {
+    "id": "upg_ventilacion",
+    "name": "Ventilación Activa",
+    "type": "upgrade",
+    "description": "Reduce el sobrecalentamiento de los reactores permitiendo ciclos más rápidos. (-Cooldown)",
+    "cost": 5,
+    "cost_type": "w_hex",
+    "max_level": 10,
+    "base_reduction": 10,
+    "level_step": 2
+  },
+  {
+    "id": "upg_tesla",
+    "name": "Bobina de Tesla",
+    "type": "upgrade",
+    "description": "Aumenta la frecuencia de descarga de las defensas eléctricas. (+Ataque Vel)",
+    "cost": 10,
+    "cost_type": "w_hex",
+    "max_level": 10,
+    "base_as": 10,
+    "level_step": 4
+  },
+  {
+    "id": "upg_descarga",
+    "name": "Descarga de Largo Alcance",
+    "type": "upgrade",
+    "description": "Amplía el campo electromagnético de las torres. (+Rango)",
+    "cost": 12,
+    "cost_type": "w_hex",
+    "max_level": 10,
+    "level_step": 15
+  }
+]

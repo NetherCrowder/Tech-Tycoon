@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tech Tycoon – Selección de partida." />
+  <title>Tech Tycoon · Partida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #050a14;
+      --surface: #0d1a2e;
+      --accent:  #00d4ff;
+      --accent2: #7c3aed;
+      --green:   #22c55e;
+      --gold:    #f59e0b;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Grid animado */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to   { background-position: 48px 48px; }
+    }
+
+    /* Orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: 0.14;
+      pointer-events: none;
+    }
+    .orb-1 { width: 550px; height: 550px; background: var(--accent2); top: -160px; right: -100px; }
+    .orb-2 { width: 480px; height: 480px; background: var(--accent);  bottom: -120px; left: -100px; }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 3rem 4rem;
+      background: rgba(13, 26, 46, 0.72);
+      border: 1px solid rgba(0,212,255,.18);
+      border-radius: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 0 60px rgba(0,212,255,.07), 0 24px 80px rgba(0,0,0,.6);
+      width: min(480px, 92vw);
+      animation: fadeUp .65s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      font-size: .67rem;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 1.6rem;
+    }
+    .breadcrumb span { color: var(--accent); }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .5rem;
+    }
+
+    .subtitle {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 2.4rem;
+    }
+
+    /* Divisor */
+    .divider {
+      width: 40%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,.3), transparent);
+      margin: 0 auto 2.2rem;
+    }
+
+    /* Botones */
+    .menu-buttons { display: flex; flex-direction: column; gap: .85rem; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      padding: .9rem 1.5rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      width: 100%;
+      transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+    }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    /* Nueva Partida – verde */
+    .btn-new {
+      color: #fff;
+      background: linear-gradient(135deg, #166534 0%, var(--green) 100%);
+      box-shadow: 0 0 22px rgba(34,197,94,.2);
+    }
+    .btn-new:hover { box-shadow: 0 0 36px rgba(34,197,94,.4); }
+
+    /* Cargar Partida – dorado */
+    .btn-load {
+      color: var(--gold);
+      background: rgba(245,158,11,.06);
+      border-color: rgba(245,158,11,.35);
+    }
+    .btn-load:hover {
+      background: rgba(245,158,11,.13);
+      border-color: rgba(245,158,11,.65);
+      box-shadow: 0 0 22px rgba(245,158,11,.18);
+    }
+
+    /* Regresar – cian sutil */
+    .btn-back {
+      color: var(--accent);
+      background: rgba(0,212,255,.05);
+      border-color: rgba(0,212,255,.28);
+      font-size: .74rem;
+    }
+    .btn-back:hover {
+      background: rgba(0,212,255,.11);
+      border-color: rgba(0,212,255,.55);
+      box-shadow: 0 0 20px rgba(0,212,255,.15);
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: fixed;
+      bottom: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .67rem;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 7px #22c55e;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .38; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <main class="card">
+    <div class="breadcrumb">MENÚ PRINCIPAL <span>›</span> PARTIDA</div>
+    <h1>Seleccionar Partida</h1>
+    <p class="subtitle">¿Cómo deseas continuar tu aventura?</p>
+    <div class="divider"></div>
+
+    <nav class="menu-buttons" aria-label="Opciones de partida">
+      <a id="btn-new-game"  href="/new-game" class="btn btn-new">  🗺️ Nueva Partida   </a>
+      <a id="btn-load-game" href="#" class="btn btn-load"> 💾 Cargar Partida  </a>
+      <a id="btn-back"      href="/" class="btn btn-back"> ← Regresar         </a>
+    </nav>
+  </main>
+
+  <div class="status-bar">
+    <div class="dot"></div>
+    SERVIDOR ACTIVO · API /api/status
+  </div>
+
+</body>
+</html>

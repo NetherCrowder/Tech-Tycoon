@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tech Tycoon – Crear Nueva Partida." />
+  <title>Tech Tycoon · Nueva Partida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #050a14;
+      --surface: rgba(13, 26, 46, 0.85);
+      --accent:  #00d4ff;
+      --accent2: #7c3aed;
+      --green:   #22c55e;
+      --gold:    #f59e0b;
+      --danger:  #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Grid animado */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none; z-index: -1;
+    }
+    @keyframes gridMove { from { background-position: 0 0; } to { background-position: 48px 48px; } }
+
+    /* Orbs */
+    .orb { position: fixed; border-radius: 50%; filter: blur(140px); opacity: 0.15; pointer-events: none; z-index: -1; }
+    .orb-1 { width: 600px; height: 600px; background: var(--green); top: -200px; right: -150px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--accent); bottom: -150px; left: -150px; }
+
+    /* Card Framework */
+    .card {
+      position: relative;
+      z-index: 10;
+      padding: 2.5rem 3.5rem;
+      background: var(--surface);
+      border: 1px solid rgba(0,212,255,.15);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 80px rgba(0,0,0,.8), inset 0 0 20px rgba(0,212,255,.05);
+      width: min(540px, 95vw);
+      animation: fadeUp .5s ease-out both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-text { text-align: center; margin-bottom: 2rem; }
+    
+    .breadcrumb {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      font-size: .65rem; font-family: 'Orbitron', monospace;
+      letter-spacing: .12em; color: var(--muted); margin-bottom: 1rem;
+    }
+    .breadcrumb span { color: var(--green); }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Formularios */
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-family: 'Orbitron', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: .6rem;
+      letter-spacing: .05em;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(0,212,255,.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(0,212,255,.15);
+    }
+
+    /* Selector de dificultad */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+    }
+    .diff-card {
+      position: relative;
+      cursor: pointer;
+      padding: 1rem;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      text-align: center;
+      transition: all .2s;
+    }
+    .diff-card input[type="radio"] { display: none; }
+    .diff-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: .85rem;
+      margin-bottom: .3rem;
+      display: block;
+    }
+    .diff-desc { font-size: .7rem; color: var(--muted); }
+
+    /* Estilos por dificultad seleccionada */
+    .diff-card:has(input:checked) {
+      transform: translateY(-2px);
+    }
+    .diff-card:has(input[value="facil"]:checked) {
+      background: rgba(34,197,94,.1); border-color: var(--green); box-shadow: 0 0 20px rgba(34,197,94,.15);
+    }
+    .diff-card:has(input[value="facil"]:checked) .diff-title { color: var(--green); }
+    
+    .diff-card:has(input[value="moderada"]:checked) {
+      background: rgba(0,212,255,.1); border-color: var(--accent); box-shadow: 0 0 20px rgba(0,212,255,.15);
+    }
+    .diff-card:has(input[value="moderada"]:checked) .diff-title { color: var(--accent); }
+
+    .diff-card:has(input[value="dificil"]:checked) {
+      background: rgba(245,158,11,.1); border-color: var(--gold); box-shadow: 0 0 20px rgba(245,158,11,.15);
+    }
+    .diff-card:has(input[value="dificil"]:checked) .diff-title { color: var(--gold); }
+
+    .diff-card:has(input[value="infernal"]:checked) {
+      background: rgba(239,68,68,.1); border-color: var(--danger); box-shadow: 0 0 20px rgba(239,68,68,.2);
+    }
+    .diff-card:has(input[value="infernal"]:checked) .diff-title { color: var(--danger); }
+
+
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(34,197,94,.3), transparent);
+      margin: 2rem 0 1.5rem;
+    }
+
+    .actions { display: flex; gap: 1rem; }
+    
+    .btn {
+      flex: 1;
+      padding: .9rem;
+      border-radius: 10px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .08em;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    
+    .btn-create {
+      background: linear-gradient(135deg, #166534, var(--green));
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 20px rgba(34,197,94,.2);
+    }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(34,197,94,.4); }
+    
+    .btn-cancel {
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,.1); }
+
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <main class="card">
+    <div class="header-text">
+        <div class="breadcrumb">MENÚ PRINCIPAL <span>›</span> NUEVA PARTIDA</div>
+        <h1>Inicialización</h1>
+    </div>
+
+    <form id="new-game-form">
+      <div class="form-group">
+        <label for="game-name">NOMBRE DE LA EMPRESA / PARTIDA</label>
+        <input type="text" id="game-name" placeholder="Ej. CyberDyne Systems" required autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="nickname">NICKNAME DEL CEO</label>
+        <input type="text" id="nickname" placeholder="Tu alias" required autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label>NIVEL DE AMENAZA (DIFICULTAD)</label>
+        <div class="diff-grid">
+          <label class="diff-card">
+            <input type="radio" name="difficulty" value="facil" checked />
+            <span class="diff-title">Fácil</span>
+            <span class="diff-desc">Recursos abundantes, ataques leves.</span>
+          </label>
+          <label class="diff-card">
+            <input type="radio" name="difficulty" value="moderada" />
+            <span class="diff-title">Moderada</span>
+            <span class="diff-desc">Equilibrio perfecto de desafíos.</span>
+          </label>
+          <label class="diff-card">
+            <input type="radio" name="difficulty" value="dificil" />
+            <span class="diff-title">Difícil</span>
+            <span class="diff-desc">Escasez y asedios constantes.</span>
+          </label>
+          <label class="diff-card">
+            <input type="radio" name="difficulty" value="infernal" />
+            <span class="diff-title">Infernal</span>
+            <span class="diff-desc">Solo para estrategas maestros.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="actions">
+        <a href="/game" class="btn btn-cancel">Cancelar</a>
+        <button type="submit" class="btn btn-create">Crear Servidor 🚀</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById('new-game-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const gameData = {
+        game_name: document.getElementById('game-name').value,
+        nickname: document.getElementById('nickname').value,
+        difficulty: document.querySelector('input[name="difficulty"]:checked').value
+      };
+
+      try {
+        const response = await fetch('/api/game/new', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(gameData)
+        });
+
+        if (response.ok) {
+          // Si todo va bien, redirigir a la interfaz del juego principal
+          window.location.href = '/play';
+        } else {
+          alert("Error al inicializar la partida.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Ocurrió un error de conexión.");
+      }
+    });
+  </script>
+</body>
+</html>

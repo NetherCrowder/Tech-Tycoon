@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tech Tycoon – Ajustes del juego." />
+  <title>Tech Tycoon · Ajustes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #050a14;
+      --accent:  #00d4ff;
+      --accent2: #7c3aed;
+      --gold:    #f59e0b;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --surface: rgba(13,26,46,.72);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to   { background-position: 48px 48px; }
+    }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(130px); opacity: .14; pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: var(--gold);   top: -120px; left: -80px; }
+    .orb-2 { width: 440px; height: 440px; background: var(--accent2); bottom: -100px; right: -80px; }
+
+    .card {
+      position: relative; z-index: 10;
+      padding: 3rem 4rem;
+      background: var(--surface);
+      border: 1px solid rgba(0,212,255,.18);
+      border-radius: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 0 60px rgba(0,212,255,.07), 0 24px 80px rgba(0,0,0,.6);
+      width: min(520px, 92vw);
+      animation: fadeUp .65s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .breadcrumb {
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      font-size: .67rem; font-family: 'Orbitron', monospace;
+      letter-spacing: .1em; color: var(--muted); margin-bottom: 1.6rem;
+    }
+    .breadcrumb span { color: var(--gold); }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; text-align: center;
+      background: linear-gradient(135deg, #fff 30%, var(--gold) 75%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 2rem;
+    }
+
+    /* Placeholder construction notice */
+    .construction {
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+      padding: 2rem; border: 1px dashed rgba(245,158,11,.35);
+      border-radius: 14px; background: rgba(245,158,11,.04);
+      color: var(--muted); font-size: .85rem; line-height: 1.6; text-align: center;
+    }
+    .construction-icon { font-size: 2.5rem; }
+
+    .divider {
+      width: 40%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,158,11,.3), transparent);
+      margin: 2rem auto;
+    }
+
+    .btn-back {
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+      font-family: 'Orbitron', monospace; font-size: .75rem; font-weight: 700;
+      letter-spacing: .09em; padding: .85rem 1.5rem; border-radius: 12px;
+      border: 1px solid rgba(0,212,255,.28); color: var(--accent);
+      background: rgba(0,212,255,.05); cursor: pointer; text-decoration: none;
+      width: 100%; transition: transform .18s, box-shadow .18s, background .18s;
+    }
+    .btn-back:hover {
+      transform: translateY(-2px); background: rgba(0,212,255,.11);
+      border-color: rgba(0,212,255,.55); box-shadow: 0 0 20px rgba(0,212,255,.15);
+    }
+
+    .status-bar {
+      position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%);
+      z-index: 20; display: flex; align-items: center; gap: .5rem;
+      font-size: .67rem; color: var(--muted); font-family: 'Orbitron', monospace;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #22c55e; box-shadow: 0 0 7px #22c55e;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.38} }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <main class="card">
+    <div class="breadcrumb">MENÚ PRINCIPAL <span>›</span> AJUSTES</div>
+    <h1>⚙️ Ajustes</h1>
+
+    <div class="construction">
+      <div class="construction-icon">🔧</div>
+      <p>Los ajustes del juego están en construcción.<br>Pronto podrás configurar audio, gráficos y controles.</p>
+    </div>
+
+    <div class="divider"></div>
+    <a id="btn-back" href="/" class="btn-back">← Regresar al Menú</a>
+  </main>
+
+  <div class="status-bar">
+    <div class="dot"></div>
+    SERVIDOR ACTIVO · API /api/status
+  </div>
+
+</body>
+</html>

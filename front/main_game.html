@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tech Tycoon – Interfaz del Juego." />
+  <title>Tech Tycoon · Servidor Activo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #050a14;
+      --surface: rgba(13, 26, 46, 0.85);
+      --surface-hover: rgba(0, 212, 255, 0.08);
+      --accent: #00d4ff;
+      --accent2: #7c3aed;
+      --green: #22c55e;
+      --gold: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      grid-template-rows: 64px 1fr;
+      grid-template-areas:
+        "recursos recursos"
+        "gestion  mapa";
+    }
+
+    /* Grid animado principal (Fondo) */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes gridMove {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 48px 48px;
+      }
+    }
+
+    /* 1. RECURSOS (Top Bar) */
+    .recursos {
+      grid-area: recursos;
+      background: var(--surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid rgba(0, 212, 255, .2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      z-index: 20;
+    }
+
+    .game-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stats-container {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .stat-label {
+      font-size: .65rem;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .05em;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .val-creditos {
+      color: var(--gold);
+    }
+
+    .val-energia {
+      color: var(--accent);
+    }
+
+    .val-amenaza {
+      color: var(--danger);
+    }
+
+    .val-oleada {
+      color: var(--accent);
+      font-family: 'Orbitron', monospace;
+      font-weight: bold;
+    }
+
+    .val-whex {
+      color: #bb86fc;
+      text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+    }
+
+    /* Game Over Overlay */
+    .game-over-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 10, 20, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .game-over-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--danger);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+    }
+
+    .game-over-stats {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .asset-lvl-bar {
+      display: flex; gap: 2px; margin-top: 4px;
+    }
+    .lvl-dot {
+      flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;
+    }
+    .lvl-dot.fill { background: var(--accent2); box-shadow: 0 0 5px var(--accent2); }
+
+    /* 2. GESTIÓN (Izquierda) */
+    .gestion {
+      grid-area: gestion;
+      background: var(--surface);
+      border-right: 1px solid rgba(0, 212, 255, .2);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(16px);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(0, 212, 255, .15);
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .1em;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .panel-header::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* Sistema de Pestañas (Tabs) */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: .85rem 0;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, .02);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: linear-gradient(to top, rgba(0, 212, 255, .1) 0%, transparent 100%);
+    }
+
+    /* Contenido dinámico de las pestañas */
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .tab-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, .2);
+      border-radius: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      padding-top: 2rem;
+      border: 1px dashed rgba(255, 255, 255, .1);
+      border-radius: 8px;
+      margin-top: 1rem;
+      padding-bottom: 2rem;
+    }
+
+    /* Zona inferior fija: Prestigio/Renacer */
+    .gestion-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid rgba(124, 58, 237, .3);
+      background: rgba(13, 26, 46, 0.9);
+    }
+
+    .btn-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-action.prestige {
+      background: linear-gradient(135deg, rgba(124, 58, 237, .15), rgba(0, 212, 255, .15));
+      border: 1px solid rgba(124, 58, 237, .5);
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .btn-action.prestige:hover {
+      background: linear-gradient(135deg, rgba(124, 58, 237, .25), rgba(0, 212, 255, .25));
+      box-shadow: 0 0 20px rgba(124, 58, 237, .3);
+      transform: translateY(-2px);
+    }
+
+    .btn-action .cost {
+      color: var(--gold);
+      font-size: .8rem;
+    }
+
+    /* Asset Cards */
+    .asset-card {
+      background: rgba(255, 255, 255, .02);
+      border: 1px solid rgba(0, 212, 255, .1);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .asset-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: .8rem;
+    }
+
+    .asset-name {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .asset-lvl {
+      font-size: .65rem;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      align-self: center;
+    }
+
+    .asset-desc {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .reactor-art {
+      width: 36px;
+      height: 36px;
+      margin-right: 12px;
+      float: left;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: .6rem;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 212, 255, .3);
+      background: rgba(0, 212, 255, .05);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      background: rgba(0, 212, 255, .2);
+      box-shadow: 0 0 10px rgba(0, 212, 255, .2);
+    }
+
+    .action-btn.btn-buy {
+      border-color: rgba(34, 197, 94, .5);
+      background: rgba(34, 197, 94, .1);
+      color: var(--green);
+    }
+
+    .action-btn.btn-buy:hover {
+      background: rgba(34, 197, 94, .2);
+      box-shadow: 0 0 10px rgba(34, 197, 94, .2);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: gray;
+      color: gray;
+      background: transparent;
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, .05);
+      border-radius: 3px;
+      margin-top: .8rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s linear;
+    }
+
+    .progress-cooldown {
+      background: var(--danger);
+    }
+
+    /* 3. MAPA (Iframe Independiente) */
+    .mapa {
+      grid-area: mapa;
+      position: relative;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .mapa-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 1. RECURSOS -->
+  <header class="recursos">
+    <div class="game-logo" id="ui-game-name">Tech Tycoon</div>
+    <div class="stats-container">
+      <div class="stat">
+        <span class="stat-label">W-HEX</span>
+        <span class="stat-value val-whex" id="w_hex">0 ⬢</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">CRÉDITOS</span>
+        <span class="stat-value val-creditos" id="creditos">0 ₡</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">ENERGÍA</span>
+        <span class="stat-value val-energia" id="energia">100 / 100 ⚡</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">AMENAZA</span>
+        <span class="stat-value val-amenaza" id="amenaza">0.0% ⚠️</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">OLEADA</span>
+        <span class="stat-value val-oleada" id="oleada">1</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Overlay Game Over -->
+  <div id="game-over-overlay" class="game-over-overlay">
+    <div class="game-over-title">CRITICAL FAILURE</div>
+    <div class="game-over-stats">
+        <p style="color:var(--muted); font-family: 'Orbitron'; margin-bottom: 1rem;">NÚCLEO DESTRUIDO</p>
+        <p id="final-stats" style="font-size: 1.2rem; line-height: 1.6;"></p>
+    </div>
+    <button class="action-btn prestige" style="width: 250px; border-color: var(--danger); color: white;" onclick="location.reload()">REINTENTAR</button>
+    <button class="action-btn" style="width: 250px; margin-top: 1rem; border:none; color:var(--muted);" onclick="location.href='/game'">SALIR AL MENÚ</button>
+  </div>
+
+  <!-- 2. GESTIÓN (TABS) -->
+  <aside class="gestion">
+    <div class="panel-header">PANEL DE GESTIÓN</div>
+
+    <!-- Navegación de Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-recoleccion')">Recolección</button>
+      <button class="tab-btn" onclick="switchTab('tab-defensas')">Defensas</button>
+      <button class="tab-btn" onclick="switchTab('tab-mejoras')">Mejoras</button>
+    </nav>
+
+    <!-- Contenido dinámico (inyectado vía JS) -->
+    <div id="tab-recoleccion" class="tab-content active">
+      <p style="padding:1rem;color:gray;">Cargando...</p>
+    </div>
+    <div id="tab-defensas" class="tab-content">
+      <p style="padding:1rem;color:gray;">Cargando...</p>
+    </div>
+    <div id="tab-mejoras" class="tab-content">
+      <p style="padding:1rem;color:gray;">Cargando...</p>
+    </div>
+
+    <!-- Renacer (Siempre visible al fondo) -->
+    <div class="gestion-footer">
+      <button class="btn-action prestige" style="border: 1px solid rgba(124,58,237,.5);"
+        onclick="alert('Nivel insuficiente')">
+        <span>✨ RENACER</span>
+        <span class="cost" style="color:var(--gold); float:right;">Nvl 50</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAPA INDEPENDIENTE -->
+  <main class="mapa">
+    <!-- Carga el nivel 1 por defecto de forma modular -->
+    <iframe class="mapa-iframe" src="/maps/level1" title="Mapa del Nivel"></iframe>
+  </main>
+
+  <script>
+    // Utilidad para formatear números largos (1K, 1M, etc)
+    function fNum(n) {
+      if (n < 1000) return Math.floor(n).toString();
+      if (n < 1000000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + "K";
+      return (n / 1000000).toFixed(1).replace(/\.0$/, '') + "M";
+    }
+
+    // Lógica para cambiar de pestañas en el panel lateral
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    async function interact(asset_id, action_type) {
+      try {
+        const res = await fetch('/api/action/interact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ asset_id, action_type })
+        });
+        const data = await res.json();
+        if (data.error) {
+          console.log("Acción denegada:", data.error);
+        }
+        updateGameState();
+      } catch (e) { console.error(e); }
+    }
+
+    // Estado interno para saber si debemos reconstruir la estructura HTML o solo actualizar
+    let lastInventoryStr = "";
+
+    function renderAssetsStructure(data) {
+      const recoleccionHTML = [];
+      const defensasHTML = [];
+      const mejorasHTML = [];
+
+      Object.entries(data.catalog).forEach(([id, asset]) => {
+        // SVG Base
+        let iconHTML = '';
+        if (id === 'reactor_mk1') {
+          iconHTML = `<svg class="reactor-art" id="svg-${id}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" fill="none" stroke="#00d4ff" stroke-width="6"/>
+                  <polygon id="svg-inner-${id}" points="50,20 80,35 80,65 50,80 20,65 20,35" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="2">
+                  </polygon>
+                  <circle id="svg-core-${id}" cx="50" cy="50" r="10" fill="#00d4ff" />
+                </svg>`;
+        } else if (asset.type === 'defense') {
+          iconHTML = `<div class="reactor-art" style="font-size:1.8rem;">🗼</div>`;
+        } else if (asset.type === 'upgrade') {
+          iconHTML = `<div class="reactor-art" style="font-size:1.8rem;">🔌</div>`;
+        } else {
+          iconHTML = `<div class="reactor-art" style="font-size:1.8rem;">👾</div>`;
+        }
+
+        let statsHTML = '';
+        if (asset.type === 'generator') {
+           statsHTML = `<div class="asset-stats" style="font-size:0.75rem; color:var(--muted); margin: 0.5rem 0; display:flex; gap:10px; font-family:'Orbitron';">
+                          <span id="stat-prod-${id}" title="Créditos por segundo">⚡ +${asset.generation_rate}/s</span>
+                          <span id="stat-cool-${id}" title="Tiempo de enfriamiento">❄️ ${asset.cooldown}s</span>
+                        </div>`;
+        }
+
+        let cardHTML = `<div class="asset-card" id="card-${id}">
+                <div class="asset-head">
+                    <div style="flex:1;">
+                        ${iconHTML}
+                        <div class="asset-name" style="display:flex; justify-content:space-between; align-items:center;">
+                            ${asset.name}
+                            <span class="asset-lvl" id="lvl-${id}"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="asset-desc">${asset.description}</div>
+                ${statsHTML}
+                ${asset.type === 'upgrade' ? `<div class="asset-lvl-bar" id="lvl-bar-${id}" style="margin-bottom:1rem;"></div>` : ''}
+                <div id="btn-container-${id}"></div>
+                <div class="progress-track" id="track-${id}" style="display:none;">
+                    <div class="progress-fill" id="fill-${id}"></div>
+                </div>
+            </div>`;
+
+        if (asset.type === 'generator') recoleccionHTML.push(cardHTML);
+        else if (asset.type === 'defense') defensasHTML.push(cardHTML);
+        else if (asset.type === 'upgrade') mejorasHTML.push(cardHTML);
+      });
+
+      document.getElementById('tab-recoleccion').innerHTML = recoleccionHTML.join('') || '<div class="empty-state"><p>Catálogo vacío</p></div>';
+      document.getElementById('tab-defensas').innerHTML = defensasHTML.join('') || '<div class="empty-state"><p>Catálogo vacío</p></div>';
+      document.getElementById('tab-mejoras').innerHTML = mejorasHTML.join('') || '<div class="empty-state"><p>Catálogo vacío</p></div>';
+    }
+
+    function updateAssetsDelta(data) {
+      // Cálculo de multiplicadores tecnológicos una vez por tick
+      const upg_c = data.inventory['upg_cableado'] || 0;
+      const upg_v = data.inventory['upg_ventilacion'] || 0;
+      const cMult = upg_c > 0 ? (1.05 + 0.44 * (upg_c - 1)) : 1.0;
+      const vMult = (1 + (upg_v > 0 ? (10 + 2 * upg_v) : 0) / 100);
+
+      Object.entries(data.catalog).forEach(([id, asset]) => {
+        let level = data.inventory[id] || 0;
+        let timers = data.timers[id] || { active: 0, cooldown: 0 };
+
+        // Actualizar estadísticas visuales dinámicamente
+        if (asset.type === 'generator') {
+           const pStat = document.getElementById(`stat-prod-${id}`);
+           const cStat = document.getElementById(`stat-cool-${id}`);
+           if (pStat) pStat.innerText = `⚡ +${(asset.generation_rate * Math.max(1, level) * cMult).toFixed(1)}/s`;
+           if (cStat) cStat.innerText = `❄️ ${(asset.cooldown / vMult).toFixed(1)}s`;
+        }
+        
+        let isWHex = asset.cost_type === 'w_hex';
+        let realCost = 0;
+        let canAfford = false;
+
+        if (isWHex) {
+            let nextLvl = level + 1;
+            realCost = Math.round(asset.cost * Math.log10(nextLvl + 1) * Math.pow(1.6, nextLvl));
+            canAfford = data.w_hex >= realCost;
+        } else {
+            // Fórmulas de Balance Solicitadas
+            if (asset.type === 'generator') {
+                realCost = Math.round(100 * Math.pow(1.15, level));
+            } else if (asset.type === 'defense') {
+                realCost = Math.round(250 * Math.pow(1.4, level));
+            } else {
+                realCost = Math.round(asset.cost * Math.pow(1.5, level));
+            }
+            canAfford = data.creditos >= realCost;
+        }
+
+        // Level text
+        let lvlSpan = document.getElementById(`lvl-${id}`);
+        if(lvlSpan) {
+            if(level > 0) {
+               lvlSpan.style.display = 'inline-block';
+               lvlSpan.innerText = asset.type === 'defense' ? `Cant: ${level}${asset.limit ? '/' + asset.limit : ''}` : `Nvl ${level}`;
+            } else {
+               lvlSpan.style.display = 'none';
+            }
+        }
+        
+        // Upgrade dots bar
+        if(asset.type === 'upgrade') {
+            let bar = document.getElementById(`lvl-bar-${id}`);
+            if(bar) {
+                let dots = "";
+                for(let i=1; i<=10; i++) {
+                    dots += `<div class="lvl-dot ${i <= level ? 'fill' : ''}"></div>`;
+                }
+                bar.innerHTML = dots;
+            }
+        }
+
+        // Animación SVG (Si existe)
+        let innerSvg = document.getElementById(`svg-inner-${id}`);
+        let coreSvg = document.getElementById(`svg-core-${id}`);
+        if(innerSvg && coreSvg) {
+            if(timers.active > 0) {
+                innerSvg.setAttribute("fill", "rgba(0,212,255,0.8)");
+                coreSvg.setAttribute("fill", "#fff");
+            } else {
+                innerSvg.setAttribute("fill", "rgba(0,212,255,0.1)");
+                coreSvg.setAttribute("fill", "#00d4ff");
+            }
+        }
+
+        // Botones de Acción
+        let btnCont = document.getElementById(`btn-container-${id}`);
+        if(btnCont) {
+            let limitReached = (asset.limit !== null && level >= asset.limit) || (asset.max_level && level >= asset.max_level);
+            let currentBtnsHTML = "";
+            let symbol = isWHex ? "⬢" : "₡";
+            let btnClass = isWHex ? "action-btn prestige" : "action-btn btn-buy";
+
+            if (level === 0) {
+               currentBtnsHTML = `<button id="btn-buy-${id}" class="${btnClass}" onclick="interact('${id}', 'buy')" ${!canAfford ? 'disabled' : ''}>Desbloquear (${fNum(realCost)} ${symbol})</button>`;
+            } else {
+               if(asset.type === 'generator') {
+                  let activable = timers.active <= 0 && timers.cooldown <= 0;
+                  let btnText = activable ? "⚡ Activar Ciclo" : (timers.active > 0 ? "Produciendo..." : `Enfriando`);
+                  currentBtnsHTML = `
+                      <button id="btn-act-${id}" class="action-btn" onclick="interact('${id}', 'activate')" ${activable ? '' : 'disabled'}>${btnText}</button>
+                      <button id="btn-buy-${id}" class="action-btn btn-buy" onclick="interact('${id}', 'buy')" style="margin-top:.5rem;" ${!canAfford ? 'disabled' : ''}>Mejorar Nivel (${fNum(realCost)} ₡)</button>
+                  `;
+               } else if (asset.type === 'defense') {
+                  if (limitReached) {
+                     currentBtnsHTML = `<button class="action-btn" disabled>Límite Máximo Alcanzado</button>`;
+                  } else {
+                     currentBtnsHTML = `<button id="btn-buy-${id}" class="action-btn btn-buy" onclick="interact('${id}', 'buy')" ${!canAfford ? 'disabled' : ''}>Construir Unidad (${fNum(realCost)} ₡)</button>`;
+                  }
+               } else {
+                  if (limitReached) {
+                      currentBtnsHTML = `<button class="action-btn" disabled>Tecnología Máxima</button>`;
+                  } else {
+                      currentBtnsHTML = `<button id="btn-buy-${id}" class="${btnClass}" onclick="interact('${id}', 'buy')" ${!canAfford ? 'disabled' : ''}>Mejorar (${fNum(realCost)} ${symbol})</button>`;
+                  }
+               }
+            }
+            // Solo actualizar el contenedor si el contenido cambió para no perder foco/interacción
+            if(btnCont.getAttribute("data-content") !== currentBtnsHTML) {
+                btnCont.innerHTML = currentBtnsHTML;
+                btnCont.setAttribute("data-content", currentBtnsHTML);
+            } else {
+                // Si el HTML es igual, solo actualizamos los estados de habilitación rápidamente
+                let bBuy = document.getElementById(`btn-buy-${id}`);
+                if(bBuy) bBuy.disabled = !canAfford;
+                let bAct = document.getElementById(`btn-act-${id}`);
+                if(bAct) bAct.disabled = timers.active > 0 || timers.cooldown > 0;
+            }
+        }
+
+        // Barras de progreso
+        let track = document.getElementById(`track-${id}`);
+        let fill = document.getElementById(`fill-${id}`);
+        if(track && fill) {
+            if (timers.active > 0) {
+              track.style.display = 'block';
+              fill.className = 'progress-fill';
+              fill.style.width = `${((asset.duration_active - timers.active) / asset.duration_active) * 100}%`;
+            } else if (timers.cooldown > 0) {
+              track.style.display = 'block';
+              fill.className = 'progress-fill progress-cooldown';
+              fill.style.width = `${(timers.cooldown / asset.cooldown) * 100}%`;
+            } else {
+              track.style.display = 'none';
+            }
+        }
+      });
+    }
+
+    function buildAssetDOM(data) {
+        let currentInvStr = JSON.stringify(data.inventory);
+        if(lastInventoryStr === "") {
+            renderAssetsStructure(data);
+            lastInventoryStr = currentInvStr;
+        }
+        updateAssetsDelta(data);
+    }
+
+    // Lógica de sincronización con el Backend (Polling)
+    async function updateGameState() {
+      try {
+        const resState = await fetch('/api/game/state');
+        if (resState.ok) {
+          const stateData = await resState.json();
+          if (stateData.game_name !== "Offline") {
+            const logo = document.getElementById('ui-game-name');
+            if (logo) logo.innerText = stateData.game_name;
+          }
+          
+          if (document.getElementById('w_hex')) {
+             document.getElementById('w_hex').innerText = fNum(stateData.recursos.w_hex || 0) + " ⬢";
+          }
+          
+          if (document.getElementById('oleada')) {
+             document.getElementById('oleada').innerText = stateData.recursos.oleada;
+          }
+          
+          document.getElementById('creditos').innerText = fNum(stateData.recursos.creditos) + " ₡";
+          document.getElementById('energia').innerText = stateData.recursos.energia + " / " + stateData.recursos.energia_max + " ⚡";
+          document.getElementById('amenaza').innerText = stateData.recursos.amenaza.toFixed(1) + "% ⚠️";
+
+          if (!stateData.is_active && stateData.recursos.energia <= 0) {
+              showGameOver(stateData);
+          }
+        }
+
+        const resAssets = await fetch('/api/assets');
+        if (resAssets.ok) {
+          const assetsData = await resAssets.json();
+          buildAssetDOM(assetsData);
+        }
+      } catch (err) { }
+    }
+
+    function showGameOver(data) {
+        const overlay = document.getElementById('game-over-overlay');
+        if (!overlay || overlay.style.display === 'flex') return;
+        
+        overlay.style.display = 'flex';
+        const statsEl = document.getElementById('final-stats');
+        if (statsEl) {
+            statsEl.innerHTML = `
+                OLEADAS SOBREVIVIDAS: <span style="color:var(--accent);">${data.recursos.oleada}</span><br>
+                CRÉDITOS GENERADOS: <span style="color:var(--gold);">${data.recursos.creditos.toFixed(0)}</span><br>
+                W-HEX OBTENIDOS: <span style="color:#bb86fc;">${data.recursos.w_hex || 0}</span>
+            `;
+        }
+    }
+
+    // Actualiza el estado inmediato al cargar junto con el loop
+    updateGameState();
+    setInterval(updateGameState, 333);
+  </script>
+</body>
+
+</html>

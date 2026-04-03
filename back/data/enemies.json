@@ -1,0 +1,17 @@
+[
+  {
+    "id": "enemy_ghosnet",
+    "name": "Ghosnet",
+    "type": "enemy",
+    "description": "Bot parásito estándar de enjambre. Roba pequeños paquetes de datos e incrementa la amenaza.",
+    "cost": 0,
+    "damage": 5,
+    "health": 100,
+    "defense": 0,
+    "speed": 12.0,
+    "target_priority": [
+      "defense_electric",
+      "core"
+    ]
+  }
+]

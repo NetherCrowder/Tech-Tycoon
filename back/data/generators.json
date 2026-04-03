@@ -1,0 +1,12 @@
+[
+  {
+    "id": "reactor_mk1",
+    "name": "Reactor mk1",
+    "type": "generator",
+    "description": "Núcleo de plasma que proporciona energía continua en ráfagas. Requiere activación manual.",
+    "cost": 100,
+    "generation_rate": 10,
+    "duration_active": 5,
+    "cooldown": 5
+  }
+]

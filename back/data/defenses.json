@@ -1,0 +1,16 @@
+[
+  {
+    "id": "pulsador_t1",
+    "name": "Pulsador T-1",
+    "type": "defense",
+    "description": "Torreta eléctrica básica que emite ondas electromagnéticas hacia objetivos cercanos.",
+    "cost": 250,
+    "damage": 10,
+    "range": 15,
+    "attack_speed": 1.5,
+    "health": 100,
+    "max_health": 100,
+    "combat_type": "electric",
+    "limit": 5
+  }
+]
